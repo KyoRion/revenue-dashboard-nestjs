@@ -46,6 +46,10 @@ Sau khi chạy xong, truy cập:
 - API: http://localhost:3001/api/v1
 - PostgreSQL: `localhost:5432`
 
+Tài khoản admin: 
+- Email: admin@admin.com
+- Password: 123123123
+
 ## Migrate và seed database
 
 Chạy migration đã có trong source:
