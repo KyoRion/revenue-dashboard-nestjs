@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum MetricPeriod {
+  CURRENT
+  PREVIOUS
+}
+
+enum ImpactDirection {
+  POSITIVE
+  NEGATIVE
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String   
+  role         String   @default("ADMIN")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("admin_users")
+}
+
+model WeeklyDashboard {
+  id                String           @id @default(cuid())
+  weekStart         DateTime         @unique @db.Date @map("week_start")
+  previousWeekStart DateTime         @db.Date @map("previous_week_start")
+  metrics           DailyMetric[]
+  events            DashboardEvent[] 
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+
+  @@map("weekly_dashboards")
+}
+
+model DailyMetric {
+  id           String       @id @default(cuid())
+  dashboardId  String       @map("dashboard_id")
+  period       MetricPeriod
+  businessDate DateTime     @db.Date @map("business_date")
+
+  posRevenue     Decimal @default(0) @db.Decimal(12, 2) @map("pos_revenue") 
+  eatclubRevenue Decimal @default(0) @db.Decimal(12, 2) @map("eatclub_revenue")
+  directRevenue  Decimal @default(0) @db.Decimal(12, 2) @map("direct_revenue")
+  totalRevenue   Decimal @default(0) @db.Decimal(12, 2) @map("total_revenue")
+  labourCosts    Decimal @default(0) @db.Decimal(12, 2) @map("labour_costs")
+  covers         Int     @default(0)
+
+  dashboard WeeklyDashboard @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([dashboardId, period, businessDate])
+  @@index([dashboardId, period])
+  @@map("daily_metrics")
+}
+
+model DashboardEvent {
+  id          String          @id @default(cuid())
+  dashboardId String          @map("dashboard_id")
+  eventDate   DateTime        @db.Date @map("event_date")
+  label       String
+  direction   ImpactDirection
+
+  dashboard WeeklyDashboard @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([dashboardId, eventDate])
+  @@map("dashboard_events")
+}

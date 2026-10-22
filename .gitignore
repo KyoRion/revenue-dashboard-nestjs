@@ -1,0 +1,19 @@
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+apps/*/node_modules/
+apps/*/.next/
+apps/*/dist/
+apps/*/coverage/
+apps/api/.agents/
+apps/api/.claude/
+apps/api/.windsurf/
+apps/api/src/generated/
+
+# Local tooling
+.DS_Store
+*.log
